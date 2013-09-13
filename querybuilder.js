@@ -1,11 +1,19 @@
 "use strict"; /*jslint node: true */
 
-var Builder = {},
-    querystring = require( "querystring" ),
-    parse = querystring.parse;
+var queryparser = require( "./queryparser" ),
+    parse = queryparser.parse;
 
 function construct( url, parameters, fragment, sep, eq ){
-    return url.concat( "?", querystring.stringify( parameters, sep, eq ), fragment );
+    return url.concat( "?", objectToQuery( parameters, sep, eq ), fragment );
+};
+
+function objectToQuery( obj, sep, eq ){
+    var buff = "", sep = sep || "&", eq = eq || "=";
+    for( var key in obj ){
+        obj.hasOwnProperty( key )
+            && ( buff = buff.concat(sep, encodeURI( key ), eq, encodeURI( obj[ key ] )));
+    }
+    return buff.substring( 1 );
 };
 
 function parseURL( url ){
@@ -16,7 +24,7 @@ function parseURL( url ){
         urlPart = safeUrl.substring( 0, ~queryStart ? queryStart : safeUrl.length - fragment.length ),
         oldQuery = ~queryStart
         ? ( safeUrl.substring( 1 + queryStart, ~fragmentStart ? fragmentStart : undefined ) ) : "";
-    return [ urlPart, oldQuery, fragment ];
+    return {url: urlPart, query: oldQuery, fragment: fragment };
 };
 
 function buildParameters( parameters, oldQuery, mode ){
@@ -39,24 +47,24 @@ function buildParameters( parameters, oldQuery, mode ){
     }
 };
 
-// Function produces new query URL from `url` string and `parameters`
-// object. It leaves old query parameters and replace matched with new ones
+// Function produces new query URL from string `url` and object `parameters`.
+// It leaves old query parameters and replace matched with new ones
 //
 //  url - string with arbitraty URL
-//  parameters is required, parameters for query separator and
-//  equivalency are optional
+//  parameters - required parameters for query
+//  separator and equivalency are optional
 
-exports.merge = Builder.merge = function( url, parameters, separator, equivalency ) {
+exports.merge = function( url, parameters, separator, equivalency ) {
     var urlParts = parseURL( url ),
-        newParameters = buildParameters( parameters, urlParts[ 1 ], { merge: 1 });
-    return construct( urlParts[ 0 ], newParameters, urlParts[ 2 ], separator, equivalency );
+        newParameters = buildParameters( parameters, urlParts.query, { merge: 1 });
+    return construct( urlParts.url, newParameters, urlParts.fragment, separator, equivalency );
 };
 
-// Function produces new query URL from `url` string and `parameters`
-// object. It completely replace old query with new one
+// Function produces new query URL from string `url` and object `parameters`.
+// It completely replace old query with new one
 
-exports.replace = Builder.replace = function( url, parameters, separator, equivalency ) {
+exports.replace = function( url, parameters, separator, equivalency ) {
     var urlParts = parseURL( url ),
         newParameters = buildParameters( parameters );
-    return construct( urlParts[ 0 ], newParameters, urlParts[ 2 ], separator, equivalency );
+    return construct( urlParts.url, newParameters, urlParts.fragment, separator, equivalency );
 };
