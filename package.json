@@ -1,0 +1,18 @@
+{
+  "name": "querybuilder",
+  "version": "0.0.0",
+  "description": "Module for building http query string from object.",
+  "main": "querybuilder.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "http",
+    "parsing"
+  ],
+  "author": "Dmitriy Rogozhin",
+  "license": "WTFPL",
+  "devDependencies": {
+    "mocha": "~1.12.1"
+  }
+}
