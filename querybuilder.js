@@ -33,7 +33,7 @@ function buildParameters( parameters, oldQuery, mode ){
         ? parse( parameters )
         : new Object( parameters );
 
-    if( typeof mode !== "undefined" && mode.merge ){
+    if( typeof mode !== "undefined" && mode.merge && oldQuery.length ){
         oldParameters = parse( oldQuery );
         // Merge new parameters into old query
         Object.getOwnPropertyNames( parameters ).forEach( function( key ){
